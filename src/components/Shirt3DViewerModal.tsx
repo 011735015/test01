@@ -268,9 +268,15 @@ const Shirt3DViewerModalComponent: React.FC<Shirt3DViewerModalProps> = ({
                 </defs>
 
                 {/* Inner Collar Cavity (Front view only) */}
-                {isFrontFacing && (
+                {isFrontFacing && shirtStyle.id !== 'hoodie' && (
                   <path
-                    d="M 220,90 Q 300,160 380,90 Q 355,65 300,64 Q 245,65 220,90 Z"
+                    d={
+                      shirtStyle.id === 'vneck'
+                        ? "M 218,90 L 300,192 L 382,90 Q 355,65 300,64 Q 245,65 218,90 Z"
+                        : shirtStyle.id === 'tanktop'
+                        ? "M 210,90 Q 300,180 390,90 Q 355,65 300,64 Q 245,65 210,90 Z"
+                        : "M 220,90 Q 300,160 380,90 Q 355,65 300,64 Q 245,65 220,90 Z"
+                    }
                     fill="#15171d"
                   />
                 )}
@@ -278,37 +284,33 @@ const Shirt3DViewerModalComponent: React.FC<Shirt3DViewerModalProps> = ({
                 {/* Garment Base Silhouette */}
                 <g fill={shirtColor.hex}>
                   <path
-                    d={`M 218,90 
-                        Q 158,110 108,140 
-                        L 58,242 
-                        Q 86,266 116,278 
-                        Q 146,240 172,244 
-                        L 162,628 
-                        Q 300,642 438,628 
-                        L 428,244 
-                        Q 454,240 484,278 
-                        Q 514,266 542,242 
-                        L 492,140 
-                        Q 442,110 382,90 
-                        Q 300, ${isFrontFacing ? 156 : 106} 218,90 Z`}
+                    d={
+                      shirtStyle.id === 'hoodie'
+                        ? `M 185,110 Q 125,145 65,220 L 100,265 Q 142,225 175,198 L 165,630 Q 300,642 435,630 L 425,198 Q 458,225 500,265 L 535,220 Q 475,145 415,110 Q 300,135 185,110 Z`
+                        : shirtStyle.id === 'tanktop'
+                        ? `M 214,92 L 248,94 Q 235,180 178,285 L 165,630 Q 300,642 435,630 L 422,285 Q 365,180 352,94 L 386,92 Q 300, ${isFrontFacing ? 180 : 120} 214,92 Z`
+                        : shirtStyle.id === 'longsleeve'
+                        ? `M 218,90 Q 162,112 118,136 L 38,446 L 66,468 L 174,242 L 165,628 Q 300,642 435,628 L 426,242 L 534,468 L 562,446 L 482,136 Q 438,112 382,90 Q 300, ${isFrontFacing ? 154 : 106} 218,90 Z`
+                        : shirtStyle.id === 'vneck'
+                        ? `M 218,90 Q 158,110 108,140 L 58,242 Q 86,266 116,278 Q 146,240 172,244 L 162,628 Q 300,642 438,628 L 428,244 Q 454,240 484,278 Q 514,266 542,242 L 492,140 Q 442,110 382,90 L 300, ${isFrontFacing ? 192 : 106} L 218,90 Z`
+                        : `M 218,90 Q 158,110 108,140 L 58,242 Q 86,266 116,278 Q 146,240 172,244 L 162,628 Q 300,642 438,628 L 428,244 Q 454,240 484,278 Q 514,266 542,242 L 492,140 Q 442,110 382,90 Q 300, ${isFrontFacing ? (shirtStyle.id === 'polo' ? 130 : 156) : 106} 218,90 Z`
+                    }
                   />
                 </g>
 
                 {/* 3D Surface Light & Volume */}
                 <path
-                  d={`M 218,90 
-                      Q 158,110 108,140 
-                      L 58,242 
-                      Q 86,266 116,278 
-                      Q 146,240 172,244 
-                      L 162,628 
-                      Q 300,642 438,628 
-                      L 428,244 
-                      Q 454,240 484,278 
-                      Q 514,266 542,242 
-                      L 492,140 
-                      Q 442,110 382,90 
-                      Q 300, ${isFrontFacing ? 156 : 106} 218,90 Z`}
+                  d={
+                    shirtStyle.id === 'hoodie'
+                      ? `M 185,110 Q 125,145 65,220 L 100,265 Q 142,225 175,198 L 165,630 Q 300,642 435,630 L 425,198 Q 458,225 500,265 L 535,220 Q 475,145 415,110 Q 300,135 185,110 Z`
+                      : shirtStyle.id === 'tanktop'
+                      ? `M 214,92 L 248,94 Q 235,180 178,285 L 165,630 Q 300,642 435,630 L 422,285 Q 365,180 352,94 L 386,92 Q 300, ${isFrontFacing ? 180 : 120} 214,92 Z`
+                      : shirtStyle.id === 'longsleeve'
+                      ? `M 218,90 Q 162,112 118,136 L 38,446 L 66,468 L 174,242 L 165,628 Q 300,642 435,628 L 426,242 L 534,468 L 562,446 L 482,136 Q 438,112 382,90 Q 300, ${isFrontFacing ? 154 : 106} 218,90 Z`
+                      : shirtStyle.id === 'vneck'
+                      ? `M 218,90 Q 158,110 108,140 L 58,242 Q 86,266 116,278 Q 146,240 172,244 L 162,628 Q 300,642 438,628 L 428,244 Q 454,240 484,278 Q 514,266 542,242 L 492,140 Q 442,110 382,90 L 300, ${isFrontFacing ? 192 : 106} L 218,90 Z`
+                      : `M 218,90 Q 158,110 108,140 L 58,242 Q 86,266 116,278 Q 146,240 172,244 L 162,628 Q 300,642 438,628 L 428,244 Q 454,240 484,278 Q 514,266 542,242 L 492,140 Q 442,110 382,90 Q 300, ${isFrontFacing ? (shirtStyle.id === 'polo' ? 130 : 156) : 106} 218,90 Z`
+                  }
                   fill="url(#mesh3dShade)"
                 />
 
@@ -321,20 +323,64 @@ const Shirt3DViewerModalComponent: React.FC<Shirt3DViewerModalProps> = ({
                 {/* Double Hem Stitching at Bottom */}
                 <path d="M 166,616 Q 300,630 434,616" stroke={shirtColor.isDark ? '#ffffff' : '#000000'} strokeWidth="1.2" strokeDasharray="4,2.5" strokeOpacity="0.25" fill="none" />
 
-                {/* Collar Ribbing Ring */}
-                <path
-                  d={`M 218,90 Q 300,${isFrontFacing ? 156 : 106} 382,90 Q 355,${isFrontFacing ? 76 : 78} 300,${isFrontFacing ? 74 : 76} Q 245,${isFrontFacing ? 76 : 78} 218,90 Z`}
-                  fill={shirtColor.hex}
-                  stroke={shirtColor.isDark ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.22)'}
-                  strokeWidth="2"
-                />
-                <path
-                  d={`M 222,94 Q 300,${isFrontFacing ? 150 : 102} 378,94`}
-                  fill="none"
-                  stroke={shirtColor.isDark ? 'rgba(255,255,255,0.16)' : 'rgba(0,0,0,0.12)'}
-                  strokeWidth="6"
-                  strokeLinecap="round"
-                />
+                {/* Collar Construction in 3D */}
+                {shirtStyle.id === 'polo' ? (
+                  isFrontFacing ? (
+                    <g>
+                      {/* Placket */}
+                      <rect x="286" y="96" width="28" height="88" rx="2" fill={shirtColor.hex} stroke="rgba(0,0,0,0.2)" strokeWidth="1.2" />
+                      <circle cx="300" cy="120" r="4.5" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="1" />
+                      <circle cx="300" cy="154" r="4.5" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="1" />
+                      {/* Left & Right Collar Wings */}
+                      <path d="M 215,84 C 242,82 276,86 295,102 L 252,158 L 204,142 Z" fill={shirtColor.hex} stroke="rgba(0,0,0,0.25)" strokeWidth="1.5" />
+                      <path d="M 385,84 C 358,82 324,86 305,102 L 348,158 L 396,142 Z" fill={shirtColor.hex} stroke="rgba(0,0,0,0.25)" strokeWidth="1.5" />
+                    </g>
+                  ) : (
+                    <path d="M 215,86 Q 300,104 385,86 Q 355,70 300,68 Q 245,70 215,86 Z" fill={shirtColor.hex} stroke="rgba(0,0,0,0.25)" strokeWidth="1.5" />
+                  )
+                ) : shirtStyle.id === 'vneck' ? (
+                  isFrontFacing ? (
+                    <g>
+                      <path d="M 218,90 L 300,192 L 382,90" fill="none" stroke={shirtColor.hex} strokeWidth="8" strokeLinecap="round" />
+                      <path d="M 218,90 L 300,192 L 382,90" fill="none" stroke={shirtColor.isDark ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.22)'} strokeWidth="1.5" />
+                    </g>
+                  ) : (
+                    <path d="M 218,90 Q 300,108 382,90" fill="none" stroke={shirtColor.hex} strokeWidth="8" strokeLinecap="round" />
+                  )
+                ) : shirtStyle.id === 'tanktop' ? (
+                  <path
+                    d={`M 214,92 Q 300,${isFrontFacing ? 180 : 120} 386,92`}
+                    fill="none"
+                    stroke={shirtColor.isDark ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.22)'}
+                    strokeWidth="5"
+                    strokeLinecap="round"
+                  />
+                ) : shirtStyle.id === 'hoodie' ? (
+                  // Hood
+                  <g>
+                    <path d="M 215,112 C 205,45 240,24 300,22 C 360,24 395,45 385,112 Q 345,155 300,158 Q 255,155 215,112 Z" fill={shirtColor.hex} stroke="rgba(0,0,0,0.25)" strokeWidth="2" />
+                    {isFrontFacing && (
+                      <path d="M 205,475 Q 200,535 180,580 L 420,580 Q 400,535 395,475 Z" fill={shirtColor.hex} stroke="rgba(0,0,0,0.25)" strokeWidth="1.5" />
+                    )}
+                  </g>
+                ) : (
+                  // Standard / Oversized / Longsleeve Crewneck
+                  <g>
+                    <path
+                      d={`M 218,90 Q 300,${isFrontFacing ? 156 : 106} 382,90 Q 355,${isFrontFacing ? 76 : 78} 300,${isFrontFacing ? 74 : 76} Q 245,${isFrontFacing ? 76 : 78} 218,90 Z`}
+                      fill={shirtColor.hex}
+                      stroke={shirtColor.isDark ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.22)'}
+                      strokeWidth="2"
+                    />
+                    <path
+                      d={`M 222,94 Q 300,${isFrontFacing ? 150 : 102} 378,94`}
+                      fill="none"
+                      stroke={shirtColor.isDark ? 'rgba(255,255,255,0.16)' : 'rgba(0,0,0,0.12)'}
+                      strokeWidth="6"
+                      strokeLinecap="round"
+                    />
+                  </g>
+                )}
               </svg>
 
               {/* Cylindrical Projected Layers mapped onto chest/back */}

@@ -1,4 +1,12 @@
-export type ShirtCut = 'oversized' | 'crewneck' | 'boxy_washed' | 'hoodie';
+export type ShirtCut = 
+  | 'crewneck' 
+  | 'polo' 
+  | 'oversized' 
+  | 'vneck' 
+  | 'longsleeve' 
+  | 'tanktop' 
+  | 'boxy_washed' 
+  | 'hoodie';
 
 export interface ShirtColor {
   id: string;

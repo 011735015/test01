@@ -84,6 +84,9 @@ const StudioControlsComponent: React.FC<StudioControlsProps> = ({
   // Preset Art filter
   const [selectedPresetCategory, setSelectedPresetCategory] = useState<string>('All');
 
+  // Garment Style filter
+  const [styleCategoryFilter, setStyleCategoryFilter] = useState<'all' | 'tshirt' | 'polo' | 'long' | 'tank'>('all');
+
   // Text layer form states
   const [customText, setCustomText] = useState('BANGKOK');
   const [fontFamily, setFontFamily] = useState<'Prompt, sans-serif' | 'Impact, sans-serif' | 'monospace' | 'serif'>('Prompt, sans-serif');
@@ -702,39 +705,107 @@ const StudioControlsComponent: React.FC<StudioControlsProps> = ({
 
             {/* Garment Cut list */}
             <div className="space-y-2.5">
-              <label className="text-xs font-medium text-slate-300">ทรงเสื้อ:</label>
-              {SHIRT_STYLES.map(style => {
-                const isSelected = shirtStyle.id === style.id;
-                return (
-                  <div
-                    key={style.id}
-                    onClick={() => {
-                      onSelectShirtStyle(style);
-                      if (!style.availableColors.some(c => c.id === shirtColor.id)) {
-                        onSelectShirtColor(style.availableColors[0]);
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1.5">
+                  <label className="text-xs font-bold text-white">ทรงเสื้อ:</label>
+                  <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-amber-400/10 text-amber-300 font-mono font-semibold border border-amber-400/20">
+                    {SHIRT_STYLES.length} รูปแบบ
+                  </span>
+                </div>
+                <span className="text-[11px] text-amber-400 font-bold">{shirtStyle.thaiName.split(' ')[0]}</span>
+              </div>
+
+              {/* Style Category Filter Pills */}
+              <div className="flex items-center gap-1 overflow-x-auto pb-1 scrollbar-none text-[11px]">
+                {[
+                  { id: 'all', label: 'ทั้งหมด (8)' },
+                  { id: 'tshirt', label: 'คอกลม & คอวี' },
+                  { id: 'polo', label: 'คอปกโปโล' },
+                  { id: 'long', label: 'แขนยาว & ฮู้ด' },
+                  { id: 'tank', label: 'เสื้อกล้าม' },
+                ].map(cat => {
+                  const isCatSelected = styleCategoryFilter === cat.id;
+                  return (
+                    <button
+                      key={cat.id}
+                      type="button"
+                      onClick={() => setStyleCategoryFilter(cat.id as typeof styleCategoryFilter)}
+                      className={`px-2.5 py-1 rounded-lg font-medium whitespace-nowrap transition-all ${
+                        isCatSelected
+                          ? 'bg-amber-400 text-slate-950 font-bold shadow-sm'
+                          : 'bg-white/5 text-slate-400 hover:text-white hover:bg-white/10'
+                      }`}
+                    >
+                      {cat.label}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div className="space-y-2 max-h-[360px] overflow-y-auto pr-1">
+                {SHIRT_STYLES
+                  .filter(style => {
+                    if (styleCategoryFilter === 'all') return true;
+                    if (styleCategoryFilter === 'tshirt') return ['crewneck', 'oversized', 'vneck', 'boxy_washed'].includes(style.id);
+                    if (styleCategoryFilter === 'polo') return style.id === 'polo';
+                    if (styleCategoryFilter === 'long') return ['longsleeve', 'hoodie'].includes(style.id);
+                    if (styleCategoryFilter === 'tank') return style.id === 'tanktop';
+                    return true;
+                  })
+                  .map(style => {
+                    const isSelected = shirtStyle.id === style.id;
+                    const badge = (() => {
+                      switch (style.id) {
+                        case 'polo': return { text: 'คอปกพรีเมียม', bg: 'bg-blue-500/20 text-blue-300 border-blue-500/30' };
+                        case 'crewneck': return { text: 'คอกลมมาตรฐาน', bg: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' };
+                        case 'oversized': return { text: 'ยอดนิยมสูงสุด', bg: 'bg-amber-400/20 text-amber-300 border-amber-400/30' };
+                        case 'vneck': return { text: 'คอวีโมเดิร์น', bg: 'bg-purple-500/20 text-purple-300 border-purple-500/30' };
+                        case 'longsleeve': return { text: 'แขนยาวจั๊มปลาย', bg: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30' };
+                        case 'tanktop': return { text: 'เสื้อกล้ามสปอร์ต', bg: 'bg-rose-500/20 text-rose-300 border-rose-500/30' };
+                        case 'boxy_washed': return { text: 'วินเทจ 90s', bg: 'bg-orange-500/20 text-orange-300 border-orange-500/30' };
+                        case 'hoodie': return { text: 'ฮู้ดดี้หนานุ่ม', bg: 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30' };
+                        default: return null;
                       }
-                    }}
-                    className={`p-3 rounded-xl border cursor-pointer transition-all ${
-                      isSelected
-                        ? 'bg-amber-400/10 border-amber-400 shadow-md ring-1 ring-amber-400/30'
-                        : 'bg-white/[0.02] border-white/10 hover:border-white/20'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-white">{style.name}</span>
-                      <span className="text-xs font-mono font-bold text-amber-400">
-                        ฿{style.basePrice}
-                      </span>
-                    </div>
-                    <p className="text-[11px] text-slate-400 mt-1 leading-normal">{style.thaiName}</p>
-                    <div className="flex items-center gap-3 mt-2 text-[10px] text-slate-500 font-mono">
-                      <span>{style.gsm} GSM</span>
-                      <span>·</span>
-                      <span>{style.material}</span>
-                    </div>
-                  </div>
-                );
-              })}
+                    })();
+
+                    return (
+                      <div
+                        key={style.id}
+                        onClick={() => {
+                          onSelectShirtStyle(style);
+                          if (!style.availableColors.some(c => c.id === shirtColor.id)) {
+                            onSelectShirtColor(style.availableColors[0]);
+                          }
+                        }}
+                        className={`p-3 rounded-xl border cursor-pointer transition-all ${
+                          isSelected
+                            ? 'bg-amber-400/10 border-amber-400 shadow-md ring-1 ring-amber-400/30'
+                            : 'bg-white/[0.02] border-white/10 hover:border-white/20 hover:bg-white/5'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <span className="text-xs font-bold text-white truncate">{style.name}</span>
+                            {badge && (
+                              <span className={`text-[9px] px-1.5 py-0.5 rounded-full border font-semibold shrink-0 ${badge.bg}`}>
+                                {badge.text}
+                              </span>
+                            )}
+                          </div>
+                          <span className="text-xs font-mono font-bold text-amber-400 shrink-0">
+                            ฿{style.basePrice}
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-slate-400 mt-1 leading-normal">{style.thaiName}</p>
+                        <div className="flex items-center gap-2.5 mt-2 text-[10px] text-slate-500 font-mono">
+                          <span className="font-semibold text-slate-400">{style.gsm} GSM</span>
+                          <span>·</span>
+                          <span className="truncate">{style.thaiMaterial}</span>
+                        </div>
+                      </div>
+                    );
+                  })}
+              </div>
             </div>
 
             {/* Fabric Color Swatches - 11 Core Colors */}

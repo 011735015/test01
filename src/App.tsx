@@ -369,6 +369,7 @@ export default function App() {
           {/* Canvas Component with Drag & Drop & Realtime Preview */}
           <ShirtMockupCanvas
             shirtStyle={shirtStyle}
+            onSelectShirtStyle={setShirtStyle}
             shirtColor={shirtColor}
             onSelectShirtColor={setShirtColor}
             availableColors={shirtStyle.availableColors}

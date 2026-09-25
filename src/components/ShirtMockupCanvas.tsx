@@ -1,5 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { PrintLayer, ShirtColor, ShirtStyle, PrintSizeOption } from '../types';
+import { SHIRT_STYLES } from '../data/mockData';
 import { 
   RotateCw, 
   Trash2, 
@@ -11,11 +12,14 @@ import {
   ZoomOut,
   Layers,
   Sparkles,
-  Info
+  Info,
+  ChevronDown,
+  Shirt
 } from 'lucide-react';
 
 interface ShirtMockupCanvasProps {
   shirtStyle: ShirtStyle;
+  onSelectShirtStyle?: (style: ShirtStyle) => void;
   shirtColor: ShirtColor;
   onSelectShirtColor?: (color: ShirtColor) => void;
   availableColors?: ShirtColor[];
@@ -33,6 +37,7 @@ interface ShirtMockupCanvasProps {
 
 const ShirtMockupCanvasComponent: React.FC<ShirtMockupCanvasProps> = ({
   shirtStyle,
+  onSelectShirtStyle,
   shirtColor,
   onSelectShirtColor,
   availableColors,
@@ -69,6 +74,7 @@ const ShirtMockupCanvasComponent: React.FC<ShirtMockupCanvasProps> = ({
   const [isDragOver, setIsDragOver] = useState(false);
   const [snapX, setSnapX] = useState(false);
   const [snapY, setSnapY] = useState(false);
+  const [isStyleMenuOpen, setIsStyleMenuOpen] = useState(false);
 
   // Active layers on the current view side
   const currentSideLayers = layers.filter(layer => layer.side === activeSide);
@@ -307,21 +313,76 @@ const ShirtMockupCanvasComponent: React.FC<ShirtMockupCanvasProps> = ({
 
       {/* Top Floating Utility Bar */}
       <div className="absolute top-4 left-4 right-4 z-20 flex items-center justify-between pointer-events-none">
-        {/* Left: View & Garment info */}
-        <div className="flex items-center gap-2 pointer-events-auto bg-[#141822]/90 backdrop-blur-md px-3 py-1.5 rounded-lg border border-white/10 text-xs shadow-md">
-          <span className="font-semibold text-slate-200">{shirtStyle.name}</span>
-          <span className="text-slate-500">·</span>
-          <span className="flex items-center gap-1.5 text-slate-400">
-            <span 
-              className="w-3 h-3 rounded-full border border-white/20 inline-block shadow-inner"
-              style={{ backgroundColor: shirtColor.hex }}
-            />
-            {shirtColor.thaiName}
-          </span>
-          <span className="text-slate-500">·</span>
-          <span className="text-amber-400 font-medium">
-            {activeSide === 'front' ? 'ด้านหน้า (Front)' : 'ด้านหลัง (Back)'}
-          </span>
+        {/* Left: View & Garment info + Quick Style Switcher */}
+        <div className="relative pointer-events-auto">
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsStyleMenuOpen(!isStyleMenuOpen);
+            }}
+            className="flex items-center gap-2 bg-[#141822]/90 hover:bg-[#1b212f] backdrop-blur-md px-3 py-1.5 rounded-lg border border-white/10 text-xs shadow-md transition-all cursor-pointer group"
+            title="คลิกเพื่อเปลี่ยนทรงเสื้อ"
+          >
+            <Shirt className="w-3.5 h-3.5 text-amber-400 group-hover:scale-110 transition-transform" />
+            <span className="font-bold text-white">{shirtStyle.thaiName.split(' ')[0]}</span>
+            <span className="text-slate-500">·</span>
+            <span className="flex items-center gap-1.5 text-slate-300">
+              <span 
+                className="w-2.5 h-2.5 rounded-full border border-white/20 inline-block shadow-inner"
+                style={{ backgroundColor: shirtColor.hex }}
+              />
+              <span className="hidden sm:inline">{shirtColor.thaiName.split(' ')[0]}</span>
+            </span>
+            <span className="text-slate-500">·</span>
+            <span className="text-amber-400 font-medium">
+              {activeSide === 'front' ? 'อกหน้า' : 'หลังเสื้อ'}
+            </span>
+            <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform ${isStyleMenuOpen ? 'rotate-180' : ''}`} />
+          </button>
+
+          {/* Quick Style Switcher Dropdown Menu */}
+          {isStyleMenuOpen && onSelectShirtStyle && (
+            <div 
+              className="absolute top-full left-0 mt-1.5 w-72 bg-[#121620] border border-white/15 rounded-xl shadow-2xl p-2 z-50 animate-in fade-in zoom-in-95 duration-100"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="px-2 py-1 text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center justify-between border-b border-white/10 mb-1.5">
+                <span>เลือกทรงเสื้อ (8 รูปแบบ)</span>
+                <span className="text-amber-400 font-mono">฿260 - ฿650</span>
+              </div>
+              <div className="space-y-1 max-h-[300px] overflow-y-auto">
+                {SHIRT_STYLES.map(style => {
+                  const isSelected = shirtStyle.id === style.id;
+                  return (
+                    <button
+                      key={style.id}
+                      type="button"
+                      onClick={() => {
+                        onSelectShirtStyle(style);
+                        setIsStyleMenuOpen(false);
+                      }}
+                      className={`w-full text-left px-2.5 py-2 rounded-lg text-xs flex items-center justify-between transition-all ${
+                        isSelected 
+                          ? 'bg-amber-400 text-slate-950 font-bold shadow-md' 
+                          : 'text-slate-200 hover:bg-white/10'
+                      }`}
+                    >
+                      <div className="flex flex-col min-w-0">
+                        <span className="truncate">{style.thaiName}</span>
+                        <span className={`text-[10px] ${isSelected ? 'text-slate-800' : 'text-slate-400'}`}>
+                          {style.gsm} GSM · {style.name}
+                        </span>
+                      </div>
+                      <span className={`font-mono text-xs shrink-0 ml-2 font-bold ${isSelected ? 'text-slate-950' : 'text-amber-400'}`}>
+                        ฿{style.basePrice}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Right: Quick Controls (Zoom, Texture, Guides) */}
@@ -463,11 +524,17 @@ const ShirtMockupCanvasComponent: React.FC<ShirtMockupCanvasProps> = ({
               </pattern>
             </defs>
 
-            {/* Inner collar tag & neck cavity background (Front view only) */}
-            {activeSide === 'front' && (
+            {/* Inner collar tag & neck cavity background (Front view only, when not hoodie) */}
+            {activeSide === 'front' && shirtStyle.id !== 'hoodie' && (
               <g>
                 <path
-                  d="M 218,92 Q 300,162 382,92 Q 355,64 300,62 Q 245,64 218,92 Z"
+                  d={
+                    shirtStyle.id === 'vneck'
+                      ? "M 218,92 L 300,192 L 382,92 Q 355,64 300,62 Q 245,64 218,92 Z"
+                      : shirtStyle.id === 'tanktop'
+                      ? "M 210,92 Q 300,180 390,92 Q 355,64 300,62 Q 245,64 210,92 Z"
+                      : "M 218,92 Q 300,162 382,92 Q 355,64 300,62 Q 245,64 218,92 Z"
+                  }
                   fill="url(#neckCavity)"
                 />
                 {/* Back Neck Reinforcement Tape */}
@@ -480,7 +547,9 @@ const ShirtMockupCanvasComponent: React.FC<ShirtMockupCanvasProps> = ({
                 <rect x="282" y="70" width="36" height="25" rx="2" fill="#e2e8f0" opacity="0.95" />
                 <line x1="284" y1="72" x2="316" y2="72" stroke="#94a3b8" strokeWidth="1" strokeDasharray="2,1" />
                 <text x="300" y="81" fill="#0f172a" fontSize="6.5" fontWeight="bold" fontFamily="sans-serif" textAnchor="middle">SCREENLAB</text>
-                <text x="300" y="89" fill="#d97706" fontSize="5.5" fontWeight="bold" fontFamily="sans-serif" textAnchor="middle">HEAVY COTTON</text>
+                <text x="300" y="89" fill="#d97706" fontSize="5.5" fontWeight="bold" fontFamily="sans-serif" textAnchor="middle">
+                  {shirtStyle.id === 'polo' ? 'PIQUE POLO' : shirtStyle.id === 'longsleeve' ? 'LONG SLEEVE' : shirtStyle.id === 'tanktop' ? 'ATHLETIC TANK' : shirtStyle.id === 'vneck' ? 'V-NECK TEE' : 'HEAVY COTTON'}
+                </text>
               </g>
             )}
 
@@ -570,15 +639,89 @@ const ShirtMockupCanvasComponent: React.FC<ShirtMockupCanvasProps> = ({
                   strokeOpacity="0.25"
                 />
               </g>
-            ) : (
-              // 2. Premium Streetwear T-Shirt (Oversized, Crewneck, Boxy Washed)
+            ) : shirtStyle.id === 'tanktop' ? (
+              // 2. Athletic / Street Tank Top (Sleeveless)
               <g>
-                {/* Main Body Silhouette with Organic Draping Curves */}
+                <path
+                  d={`M 214,92 
+                      L 248,94 
+                      Q 235,180 178,285 
+                      L 165,630 
+                      Q 300,642 435,630 
+                      L 422,285 
+                      Q 365,180 352,94 
+                      L 386,92 
+                      Q 300, ${activeSide === 'front' ? 180 : 120} 214,92 Z`}
+                  fill={shirtColor.hex}
+                />
+                {/* Armhole Bindings */}
+                <path
+                  d="M 248,94 Q 235,180 178,285"
+                  fill="none"
+                  stroke={shirtColor.isDark ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.22)'}
+                  strokeWidth="3.5"
+                />
+                <path
+                  d="M 352,94 Q 365,180 422,285"
+                  fill="none"
+                  stroke={shirtColor.isDark ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.22)'}
+                  strokeWidth="3.5"
+                />
+                {/* Armpit subtle shadow */}
+                <g stroke={shirtColor.isDark ? 'rgba(0,0,0,0.5)' : 'rgba(0,0,0,0.22)'} fill="none">
+                  <path d="M 178,285 Q 192,298 188,318" strokeWidth="2.5" strokeLinecap="round" />
+                  <path d="M 422,285 Q 408,298 412,318" strokeWidth="2.5" strokeLinecap="round" />
+                </g>
+                {/* Bottom Hem Double-Needle Stitch */}
+                <path d="M 166,616 Q 300,630 434,616" fill="none" stroke={shirtColor.isDark ? '#ffffff' : '#000000'} strokeWidth="1.2" strokeDasharray="4,2.5" strokeOpacity="0.25" />
+                <path d="M 165,621 Q 300,635 435,621" fill="none" stroke={shirtColor.isDark ? '#ffffff' : '#000000'} strokeWidth="1.2" strokeDasharray="4,2.5" strokeOpacity="0.25" />
+              </g>
+            ) : shirtStyle.id === 'longsleeve' ? (
+              // 3. Streetwear Long Sleeve Tee
+              <g>
+                <path
+                  d={`M 218,92 
+                      Q 162,112 118,136 
+                      L 38,446 
+                      L 66,468 
+                      L 174,242 
+                      L 165,630 
+                      Q 300,642 435,630 
+                      L 426,242 
+                      L 534,468 
+                      L 562,446 
+                      L 482,136 
+                      Q 438,112 382,92 
+                      Q 300, ${activeSide === 'front' ? 154 : 106} 218,92 Z`}
+                  fill={shirtColor.hex}
+                />
+                {/* Left Ribbed Wrist Cuff (2-inch) */}
+                <g>
+                  <path d="M 38,446 L 66,468" stroke={shirtColor.isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.25)'} strokeWidth="10" strokeLinecap="square" />
+                  <path d="M 44,438 L 72,460" stroke={shirtColor.isDark ? '#ffffff' : '#000000'} strokeWidth="1.2" strokeDasharray="3,2" strokeOpacity="0.3" fill="none" />
+                </g>
+                {/* Right Ribbed Wrist Cuff (2-inch) */}
+                <g>
+                  <path d="M 562,446 L 534,468" stroke={shirtColor.isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.25)'} strokeWidth="10" strokeLinecap="square" />
+                  <path d="M 556,438 L 528,460" stroke={shirtColor.isDark ? '#ffffff' : '#000000'} strokeWidth="1.2" strokeDasharray="3,2" strokeOpacity="0.3" fill="none" />
+                </g>
+                {/* Sleeve Elbow Folds */}
+                <path d="M 96,275 Q 115,295 106,315" stroke="rgba(0,0,0,0.22)" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+                <path d="M 504,275 Q 485,295 494,315" stroke="rgba(0,0,0,0.22)" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+                {/* Underarm Creases */}
+                <path d="M 172,246 Q 192,268 186,295" stroke={shirtColor.isDark ? 'rgba(0,0,0,0.5)' : 'rgba(0,0,0,0.22)'} strokeWidth="2.5" strokeLinecap="round" fill="none" />
+                <path d="M 428,246 Q 408,268 414,295" stroke={shirtColor.isDark ? 'rgba(0,0,0,0.5)' : 'rgba(0,0,0,0.22)'} strokeWidth="2.5" strokeLinecap="round" fill="none" />
+                {/* Bottom Hem Double-Needle Stitch */}
+                <path d="M 166,616 Q 300,630 434,616" fill="none" stroke={shirtColor.isDark ? '#ffffff' : '#000000'} strokeWidth="1.2" strokeDasharray="4,2.5" strokeOpacity="0.25" />
+                <path d="M 165,621 Q 300,635 435,621" fill="none" stroke={shirtColor.isDark ? '#ffffff' : '#000000'} strokeWidth="1.2" strokeDasharray="4,2.5" strokeOpacity="0.25" />
+              </g>
+            ) : (
+              // 4. Standard / Oversized / Boxy / Polo / V-Neck Silhouettes
+              <g>
                 <path
                   d={
                     shirtStyle.id === 'oversized'
-                      ? // Dropped Shoulder Streetwear Oversized Silhouette
-                        `M 218,92 
+                      ? `M 218,92 
                          Q 158,112 108,142 
                          L 58,245 
                          Q 86,268 116,280 
@@ -592,8 +735,7 @@ const ShirtMockupCanvasComponent: React.FC<ShirtMockupCanvasProps> = ({
                          Q 442,112 382,92 
                          Q 300, ${activeSide === 'front' ? 158 : 108} 218,92 Z`
                       : shirtStyle.id === 'boxy_washed'
-                      ? // Boxy Cut Vintage Silhouette
-                        `M 218,92 
+                      ? `M 218,92 
                          Q 150,110 98,136 
                          L 48,235 
                          Q 80,260 112,272 
@@ -606,7 +748,22 @@ const ShirtMockupCanvasComponent: React.FC<ShirtMockupCanvasProps> = ({
                          L 502,136 
                          Q 450,110 382,92 
                          Q 300, ${activeSide === 'front' ? 158 : 108} 218,92 Z`
-                      : // Classic Tailored Standard Crewneck
+                      : shirtStyle.id === 'vneck'
+                      ? `M 218,92 
+                         Q 165,115 124,136 
+                         L 78,222 
+                         Q 102,242 128,252 
+                         Q 154,218 174,222 
+                         L 165,630 
+                         Q 300,642 435,630 
+                         L 426,222 
+                         Q 446,218 472,252 
+                         Q 498,242 522,222 
+                         L 476,136 
+                         Q 435,115 382,92 
+                         L 300, ${activeSide === 'front' ? 192 : 106} 
+                         L 218,92 Z`
+                      : // Polo or Standard Crewneck
                         `M 218,92 
                          Q 165,115 124,136 
                          L 78,222 
@@ -619,48 +776,38 @@ const ShirtMockupCanvasComponent: React.FC<ShirtMockupCanvasProps> = ({
                          Q 498,242 522,222 
                          L 476,136 
                          Q 435,115 382,92 
-                         Q 300, ${activeSide === 'front' ? 154 : 106} 218,92 Z`
+                         Q 300, ${activeSide === 'front' ? (shirtStyle.id === 'polo' ? 130 : 154) : 106} 218,92 Z`
                   }
                   fill={shirtColor.hex}
                 />
 
-                {/* Dropped Shoulder Seam Stitch line (for Oversized / Boxy) */}
-                {shirtStyle.id !== 'crewneck' && (
+                {/* Dropped Shoulder Seam (for Oversized / Boxy) */}
+                {(shirtStyle.id === 'oversized' || shirtStyle.id === 'boxy_washed') && (
                   <g>
                     <path d="M 125,130 Q 150,185 168,240" fill="none" stroke={shirtColor.isDark ? '#ffffff' : '#000000'} strokeWidth="1" strokeDasharray="3,2" strokeOpacity="0.22" />
                     <path d="M 475,130 Q 450,185 432,240" fill="none" stroke={shirtColor.isDark ? '#ffffff' : '#000000'} strokeWidth="1" strokeDasharray="3,2" strokeOpacity="0.22" />
                   </g>
                 )}
 
-                {/* Natural Fabric Wrinkle Folds at Underarms (Realistic Creases) */}
+                {/* Polo Side Split Vents */}
+                {shirtStyle.id === 'polo' && (
+                  <g stroke={shirtColor.isDark ? '#ffffff' : '#000000'} strokeWidth="1.5" strokeOpacity="0.3">
+                    <line x1="165" y1="608" x2="165" y2="630" />
+                    <line x1="435" y1="608" x2="435" y2="630" />
+                  </g>
+                )}
+
+                {/* Underarm Creases */}
                 <g stroke={shirtColor.isDark ? 'rgba(0,0,0,0.5)' : 'rgba(0,0,0,0.22)'} fill="none">
-                  {/* Left Armpit Creases */}
                   <path d="M 172,246 Q 192,268 186,295" strokeWidth="2.5" strokeLinecap="round" />
-                  <path d="M 170,260 Q 182,278 178,305" strokeWidth="1.8" strokeLinecap="round" opacity="0.7" />
-                  {/* Right Armpit Creases */}
                   <path d="M 428,246 Q 408,268 414,295" strokeWidth="2.5" strokeLinecap="round" />
-                  <path d="M 430,260 Q 418,278 422,305" strokeWidth="1.8" strokeLinecap="round" opacity="0.7" />
                 </g>
 
-                {/* Subtle Hem & Seam double-needle lockstitching lines */}
-                <path
-                  d="M 166,616 Q 300,630 434,616"
-                  fill="none"
-                  stroke={shirtColor.isDark ? '#ffffff' : '#000000'}
-                  strokeWidth="1.2"
-                  strokeDasharray="4,2.5"
-                  strokeOpacity="0.25"
-                />
-                <path
-                  d="M 165,621 Q 300,635 435,621"
-                  fill="none"
-                  stroke={shirtColor.isDark ? '#ffffff' : '#000000'}
-                  strokeWidth="1.2"
-                  strokeDasharray="4,2.5"
-                  strokeOpacity="0.25"
-                />
+                {/* Bottom Hem Stitches */}
+                <path d="M 166,616 Q 300,630 434,616" fill="none" stroke={shirtColor.isDark ? '#ffffff' : '#000000'} strokeWidth="1.2" strokeDasharray="4,2.5" strokeOpacity="0.25" />
+                <path d="M 165,621 Q 300,635 435,621" fill="none" stroke={shirtColor.isDark ? '#ffffff' : '#000000'} strokeWidth="1.2" strokeDasharray="4,2.5" strokeOpacity="0.25" />
 
-                {/* Left & Right Sleeve cuffs double stitching */}
+                {/* Sleeve Cuffs */}
                 <path
                   d={
                     shirtStyle.id === 'oversized'
@@ -703,68 +850,224 @@ const ShirtMockupCanvasComponent: React.FC<ShirtMockupCanvasProps> = ({
             <ellipse cx="300" cy="340" rx="160" ry="200" fill="url(#chestVolume)" />
 
             {/* Top Shoulder Key Light */}
-            <path
-              d="M 218,92 Q 158,112 108,142 L 172,246 L 428,246 L 492,142 Q 442,112 382,92 Z"
-              fill="url(#topShoulderLight)"
-            />
+            {shirtStyle.id !== 'tanktop' && (
+              <path
+                d="M 218,92 Q 158,112 108,142 L 172,246 L 428,246 L 492,142 Q 442,112 382,92 Z"
+                fill="url(#topShoulderLight)"
+              />
+            )}
 
-            {/* Sleeve Crease Shadows */}
-            <path d="M 60,240 L 172,246 L 165,295 Z" fill="url(#sleeveShadowL)" />
-            <path d="M 540,240 L 428,246 L 435,295 Z" fill="url(#sleeveShadowR)" />
-
-            {/* Heavy Ribbed Collar Construction */}
-            {activeSide === 'front' ? (
+            {/* Sleeve Crease Shadows (for standard sleeves) */}
+            {shirtStyle.id !== 'tanktop' && shirtStyle.id !== 'longsleeve' && (
               <g>
-                {/* Natural Drop Shadow Beneath Collar onto Chest */}
-                <path
-                  d="M 214,94 Q 300,172 386,94 Q 300,158 214,94 Z"
-                  fill="#000000"
-                  fillOpacity="0.32"
-                />
-
-                {/* Thick 1.2 Inch Streetwear Ribbed Neckband */}
-                <path
-                  d="M 218,92 Q 300,160 382,92 Q 355,76 300,74 Q 245,76 218,92 Z"
-                  fill={shirtColor.hex}
-                  stroke={shirtColor.isDark ? 'rgba(255,255,255,0.22)' : 'rgba(0,0,0,0.18)'}
-                  strokeWidth="1.5"
-                />
-
-                {/* Ribbed Band Texture Strokes */}
-                <path
-                  d="M 222,96 Q 300,154 378,96"
-                  fill="none"
-                  stroke={shirtColor.isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.12)'}
-                  strokeWidth="8"
-                  strokeLinecap="round"
-                />
-
-                {/* Double-Needle Seam along Neckband Base */}
-                <path
-                  d="M 216,92 Q 300,164 384,92"
-                  fill="none"
-                  stroke={shirtColor.isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.25)'}
-                  strokeWidth="1.2"
-                  strokeDasharray="4,2.5"
-                />
+                <path d="M 60,240 L 172,246 L 165,295 Z" fill="url(#sleeveShadowL)" />
+                <path d="M 540,240 L 428,246 L 435,295 Z" fill="url(#sleeveShadowR)" />
               </g>
-            ) : (
-              // Back Collar Construction
-              <g>
-                <path
-                  d="M 218,92 Q 300,112 382,92 Q 355,80 300,78 Q 245,80 218,92 Z"
-                  fill={shirtColor.hex}
-                  stroke={shirtColor.isDark ? 'rgba(255,255,255,0.22)' : 'rgba(0,0,0,0.18)'}
-                  strokeWidth="1.5"
-                />
-                <path
-                  d="M 216,92 Q 300,116 384,92"
-                  fill="none"
-                  stroke={shirtColor.isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.25)'}
-                  strokeWidth="1.2"
-                  strokeDasharray="4,2.5"
-                />
-              </g>
+            )}
+
+            {/* Collar & Neck Construction by Shirt Style */}
+            {shirtStyle.id === 'polo' ? (
+              // POLO COLLAR & PLACKET WITH BUTTONS
+              activeSide === 'front' ? (
+                <g>
+                  {/* Placket Underlayer & Shadow */}
+                  <rect x="284" y="98" width="32" height="96" rx="2" fill="#000000" fillOpacity="0.18" />
+                  {/* Real Placket Body */}
+                  <rect 
+                    x="284" 
+                    y="96" 
+                    width="32" 
+                    height="95" 
+                    rx="2" 
+                    fill={shirtColor.hex} 
+                    stroke={shirtColor.isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.18)'} 
+                    strokeWidth="1.2" 
+                  />
+                  {/* Placket Stitch Line */}
+                  <line x1="288" y1="98" x2="288" y2="188" stroke={shirtColor.isDark ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.2)'} strokeWidth="1" strokeDasharray="3,2" />
+                  <line x1="312" y1="98" x2="312" y2="188" stroke={shirtColor.isDark ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.2)'} strokeWidth="1" strokeDasharray="3,2" />
+                  <line x1="284" y1="190" x2="316" y2="190" stroke={shirtColor.isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.25)'} strokeWidth="1.2" />
+
+                  {/* Button 1 (Top) */}
+                  <circle cx="300" cy="122" r="5" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="1" />
+                  <circle cx="298.5" cy="120.5" r="0.8" fill="#475569" />
+                  <circle cx="301.5" cy="120.5" r="0.8" fill="#475569" />
+                  <circle cx="298.5" cy="123.5" r="0.8" fill="#475569" />
+                  <circle cx="301.5" cy="123.5" r="0.8" fill="#475569" />
+
+                  {/* Button 2 (Bottom) */}
+                  <circle cx="300" cy="158" r="5" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="1" />
+                  <circle cx="298.5" cy="156.5" r="0.8" fill="#475569" />
+                  <circle cx="301.5" cy="156.5" r="0.8" fill="#475569" />
+                  <circle cx="298.5" cy="159.5" r="0.8" fill="#475569" />
+                  <circle cx="301.5" cy="159.5" r="0.8" fill="#475569" />
+
+                  {/* Left Collar Wing Shadow */}
+                  <path d="M 212,86 C 238,84 278,88 296,104 L 250,166 L 202,148 Z" fill="#000000" fillOpacity="0.25" />
+                  {/* Left Collar Wing */}
+                  <path 
+                    d="M 215,84 C 242,82 276,86 295,102 L 252,162 L 204,144 Z" 
+                    fill={shirtColor.hex} 
+                    stroke={shirtColor.isDark ? 'rgba(255,255,255,0.22)' : 'rgba(0,0,0,0.22)'} 
+                    strokeWidth="1.5" 
+                  />
+                  <path d="M 218,88 C 242,86 272,90 288,102 L 250,154" fill="none" stroke={shirtColor.isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.12)'} strokeWidth="1" strokeDasharray="3,2" />
+
+                  {/* Right Collar Wing Shadow */}
+                  <path d="M 388,86 C 362,84 322,88 304,104 L 350,166 L 398,148 Z" fill="#000000" fillOpacity="0.25" />
+                  {/* Right Collar Wing */}
+                  <path 
+                    d="M 385,84 C 358,82 324,86 305,102 L 348,162 L 396,144 Z" 
+                    fill={shirtColor.hex} 
+                    stroke={shirtColor.isDark ? 'rgba(255,255,255,0.22)' : 'rgba(0,0,0,0.22)'} 
+                    strokeWidth="1.5" 
+                  />
+                  <path d="M 382,88 C 358,86 328,90 312,102 L 350,154" fill="none" stroke={shirtColor.isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.12)'} strokeWidth="1" strokeDasharray="3,2" />
+
+                  {/* Neck Band Stand Top Edge */}
+                  <path d="M 215,84 Q 300,74 385,84" fill="none" stroke={shirtColor.isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.25)'} strokeWidth="1.5" />
+                </g>
+              ) : (
+                <g>
+                  {/* Back Polo Collar Fold */}
+                  <path
+                    d="M 215,86 Q 300,104 385,86 Q 355,70 300,68 Q 245,70 215,86 Z"
+                    fill={shirtColor.hex}
+                    stroke={shirtColor.isDark ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.22)'}
+                    strokeWidth="1.5"
+                  />
+                  <path
+                    d="M 218,88 Q 300,106 382,88"
+                    fill="none"
+                    stroke={shirtColor.isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.18)'}
+                    strokeWidth="1.2"
+                    strokeDasharray="4,2.5"
+                  />
+                </g>
+              )
+            ) : shirtStyle.id === 'vneck' ? (
+              // V-NECK COLLAR
+              activeSide === 'front' ? (
+                <g>
+                  {/* V-Neck Drop Shadow onto chest */}
+                  <path d="M 216,94 L 300,196 L 384,94 L 300,186 Z" fill="#000000" fillOpacity="0.32" />
+                  {/* V-Neck Ribbed Band Left */}
+                  <path 
+                    d="M 218,92 L 300,192 L 304,184 L 226,88 Z" 
+                    fill={shirtColor.hex} 
+                    stroke={shirtColor.isDark ? 'rgba(255,255,255,0.22)' : 'rgba(0,0,0,0.18)'} 
+                    strokeWidth="1.2" 
+                  />
+                  {/* V-Neck Ribbed Band Right (overlapping) */}
+                  <path 
+                    d="M 382,92 L 300,192 L 296,184 L 374,88 Z" 
+                    fill={shirtColor.hex} 
+                    stroke={shirtColor.isDark ? 'rgba(255,255,255,0.22)' : 'rgba(0,0,0,0.18)'} 
+                    strokeWidth="1.2" 
+                  />
+                  {/* Miter Center Seam */}
+                  <line x1="300" y1="184" x2="300" y2="192" stroke={shirtColor.isDark ? '#ffffff' : '#000000'} strokeWidth="1" strokeOpacity="0.4" />
+                  {/* Topstitch seam */}
+                  <path d="M 216,92 L 300,194 L 384,92" fill="none" stroke={shirtColor.isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.25)'} strokeWidth="1.2" strokeDasharray="4,2.5" />
+                </g>
+              ) : (
+                <g>
+                  <path d="M 218,92 Q 300,110 382,92 Q 355,80 300,78 Q 245,80 218,92 Z" fill={shirtColor.hex} stroke={shirtColor.isDark ? 'rgba(255,255,255,0.22)' : 'rgba(0,0,0,0.18)'} strokeWidth="1.5" />
+                  <path d="M 216,92 Q 300,114 384,92" fill="none" stroke={shirtColor.isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.25)'} strokeWidth="1.2" strokeDasharray="4,2.5" />
+                </g>
+              )
+            ) : shirtStyle.id === 'tanktop' ? (
+              // TANK TOP SCOOP NECK
+              activeSide === 'front' ? (
+                <g>
+                  <path
+                    d="M 214,92 Q 300,180 386,92"
+                    fill="none"
+                    stroke={shirtColor.isDark ? 'rgba(255,255,255,0.22)' : 'rgba(0,0,0,0.18)'}
+                    strokeWidth="6"
+                    strokeLinecap="round"
+                  />
+                  <path
+                    d="M 212,92 Q 300,183 388,92"
+                    fill="none"
+                    stroke={shirtColor.isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.25)'}
+                    strokeWidth="1.2"
+                    strokeDasharray="4,2.5"
+                  />
+                </g>
+              ) : (
+                <g>
+                  <path
+                    d="M 214,92 Q 300,122 386,92"
+                    fill="none"
+                    stroke={shirtColor.isDark ? 'rgba(255,255,255,0.22)' : 'rgba(0,0,0,0.18)'}
+                    strokeWidth="6"
+                    strokeLinecap="round"
+                  />
+                  <path
+                    d="M 212,92 Q 300,125 388,92"
+                    fill="none"
+                    stroke={shirtColor.isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.25)'}
+                    strokeWidth="1.2"
+                    strokeDasharray="4,2.5"
+                  />
+                </g>
+              )
+            ) : shirtStyle.id === 'hoodie' ? null : (
+              // CREWNECK (Standard, Oversized, Long Sleeve, Boxy Washed)
+              activeSide === 'front' ? (
+                <g>
+                  {/* Natural Drop Shadow Beneath Collar onto Chest */}
+                  <path
+                    d="M 214,94 Q 300,172 386,94 Q 300,158 214,94 Z"
+                    fill="#000000"
+                    fillOpacity="0.32"
+                  />
+
+                  {/* Thick 1.2 Inch Streetwear Ribbed Neckband */}
+                  <path
+                    d="M 218,92 Q 300,160 382,92 Q 355,76 300,74 Q 245,76 218,92 Z"
+                    fill={shirtColor.hex}
+                    stroke={shirtColor.isDark ? 'rgba(255,255,255,0.22)' : 'rgba(0,0,0,0.18)'}
+                    strokeWidth="1.5"
+                  />
+
+                  {/* Ribbed Band Texture Strokes */}
+                  <path
+                    d="M 222,96 Q 300,154 378,96"
+                    fill="none"
+                    stroke={shirtColor.isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.12)'}
+                    strokeWidth="8"
+                    strokeLinecap="round"
+                  />
+
+                  {/* Double-Needle Seam along Neckband Base */}
+                  <path
+                    d="M 216,92 Q 300,164 384,92"
+                    fill="none"
+                    stroke={shirtColor.isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.25)'}
+                    strokeWidth="1.2"
+                    strokeDasharray="4,2.5"
+                  />
+                </g>
+              ) : (
+                // Back Collar Construction
+                <g>
+                  <path
+                    d="M 218,92 Q 300,112 382,92 Q 355,80 300,78 Q 245,80 218,92 Z"
+                    fill={shirtColor.hex}
+                    stroke={shirtColor.isDark ? 'rgba(255,255,255,0.22)' : 'rgba(0,0,0,0.18)'}
+                    strokeWidth="1.5"
+                  />
+                  <path
+                    d="M 216,92 Q 300,116 384,92"
+                    fill="none"
+                    stroke={shirtColor.isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.25)'}
+                    strokeWidth="1.2"
+                    strokeDasharray="4,2.5"
+                  />
+                </g>
+              )
             )}
           </svg>
         </div>
