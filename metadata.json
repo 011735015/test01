@@ -1,0 +1,8 @@
+{
+  "name": "Remix ScreenLab Studio - ออกแบบลายเสื้อ \u0026 สั่งสกรีนออนไลน์",
+  "description": "ระบบออกแบบเสื้อยืดออนไลน์ เลือกลายและอัปโหลดรูปภาพ จัดวางตำแหน่งอิสระ สั่งสกรีนเสื้อพรีเมียมได้ทันที",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
