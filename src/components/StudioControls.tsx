@@ -148,97 +148,110 @@ const StudioControlsComponent: React.FC<StudioControlsProps> = ({
 
   return (
     <div className="w-full lg:w-[430px] flex flex-col bg-[#11141C] border-l border-white/10 h-full overflow-hidden text-slate-100">
-      {/* Top Tab Bar */}
-      <div className="flex items-center overflow-x-auto border-b border-white/10 bg-[#0E1015] scrollbar-none p-1.5 gap-1 shrink-0">
-        <button
-          onClick={() => setActiveTab('upload')}
-          className={`flex items-center gap-1.5 px-3 py-2 text-xs rounded-lg font-medium whitespace-nowrap transition-all ${
-            activeTab === 'upload'
-              ? 'bg-amber-400 text-slate-950 font-bold shadow-sm'
-              : 'text-slate-400 hover:text-white hover:bg-white/5'
-          }`}
-        >
-          <Upload className="w-3.5 h-3.5" />
-          <span>อัปโหลดรูป</span>
-        </button>
+      {/* Top Tab Bar - Dual Row Grid (Zero horizontal overflow, spacious & clearly visible) */}
+      <div className="p-2 sm:p-2.5 bg-[#0E1015] border-b border-white/10 shrink-0 space-y-1.5">
+        {/* Row 1: Design & Artwork Tools (4 tabs) */}
+        <div className="grid grid-cols-4 gap-1.5">
+          <button
+            type="button"
+            onClick={() => setActiveTab('upload')}
+            className={`flex flex-col sm:flex-row items-center justify-center gap-1 py-2 px-1.5 text-xs rounded-lg font-medium transition-all text-center ${
+              activeTab === 'upload'
+                ? 'bg-amber-400 text-slate-950 font-bold shadow-sm'
+                : 'bg-white/[0.03] text-slate-300 hover:text-white hover:bg-white/[0.08] border border-white/5'
+            }`}
+          >
+            <Upload className="w-3.5 h-3.5 shrink-0" />
+            <span className="truncate">อัปโหลด</span>
+          </button>
 
-        <button
-          onClick={() => {
-            if (onOpenImageAiTools) {
-              onOpenImageAiTools('ai_prompt');
-            } else {
-              setActiveTab('ai_prompt');
-            }
-          }}
-          className={`flex items-center gap-1.5 px-3 py-2 text-xs rounded-lg font-medium whitespace-nowrap transition-all ${
-            activeTab === 'ai_prompt'
-              ? 'bg-gradient-to-r from-amber-400 to-amber-300 text-slate-950 font-bold shadow-sm'
-              : 'text-amber-400 hover:bg-amber-400/10'
-          }`}
-        >
-          <Sparkles className="w-3.5 h-3.5" />
-          <span>เจนด้วย AI</span>
-        </button>
+          <button
+            type="button"
+            onClick={() => {
+              if (onOpenImageAiTools) {
+                onOpenImageAiTools('ai_prompt');
+              } else {
+                setActiveTab('ai_prompt');
+              }
+            }}
+            className={`flex flex-col sm:flex-row items-center justify-center gap-1 py-2 px-1.5 text-xs rounded-lg font-medium transition-all text-center ${
+              activeTab === 'ai_prompt'
+                ? 'bg-gradient-to-r from-amber-400 to-amber-300 text-slate-950 font-bold shadow-sm'
+                : 'bg-white/[0.03] text-amber-400 hover:text-amber-300 hover:bg-amber-400/10 border border-amber-400/20'
+            }`}
+          >
+            <Sparkles className="w-3.5 h-3.5 shrink-0" />
+            <span className="truncate">เจน AI</span>
+          </button>
 
-        <button
-          onClick={() => setActiveTab('preset')}
-          className={`flex items-center gap-1.5 px-3 py-2 text-xs rounded-lg font-medium whitespace-nowrap transition-all ${
-            activeTab === 'preset'
-              ? 'bg-amber-400 text-slate-950 font-bold shadow-sm'
-              : 'text-slate-400 hover:text-white hover:bg-white/5'
-          }`}
-        >
-          <ImageIcon className="w-3.5 h-3.5" />
-          <span>คลังลาย</span>
-        </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('preset')}
+            className={`flex flex-col sm:flex-row items-center justify-center gap-1 py-2 px-1.5 text-xs rounded-lg font-medium transition-all text-center ${
+              activeTab === 'preset'
+                ? 'bg-amber-400 text-slate-950 font-bold shadow-sm'
+                : 'bg-white/[0.03] text-slate-300 hover:text-white hover:bg-white/[0.08] border border-white/5'
+            }`}
+          >
+            <ImageIcon className="w-3.5 h-3.5 shrink-0" />
+            <span className="truncate">คลังลาย</span>
+          </button>
 
-        <button
-          onClick={() => setActiveTab('text')}
-          className={`flex items-center gap-1.5 px-3 py-2 text-xs rounded-lg font-medium whitespace-nowrap transition-all ${
-            activeTab === 'text'
-              ? 'bg-amber-400 text-slate-950 font-bold shadow-sm'
-              : 'text-slate-400 hover:text-white hover:bg-white/5'
-          }`}
-        >
-          <Type className="w-3.5 h-3.5" />
-          <span>ข้อความ</span>
-        </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('text')}
+            className={`flex flex-col sm:flex-row items-center justify-center gap-1 py-2 px-1.5 text-xs rounded-lg font-medium transition-all text-center ${
+              activeTab === 'text'
+                ? 'bg-amber-400 text-slate-950 font-bold shadow-sm'
+                : 'bg-white/[0.03] text-slate-300 hover:text-white hover:bg-white/[0.08] border border-white/5'
+            }`}
+          >
+            <Type className="w-3.5 h-3.5 shrink-0" />
+            <span className="truncate">ข้อความ</span>
+          </button>
+        </div>
 
-        <button
-          onClick={() => setActiveTab('garment')}
-          className={`flex items-center gap-1.5 px-3 py-2 text-xs rounded-lg font-medium whitespace-nowrap transition-all ${
-            activeTab === 'garment'
-              ? 'bg-amber-400 text-slate-950 font-bold shadow-sm'
-              : 'text-slate-400 hover:text-white hover:bg-white/5'
-          }`}
-        >
-          <Shirt className="w-3.5 h-3.5" />
-          <span>ทรง & สี</span>
-        </button>
+        {/* Row 2: Garment, Tech & Layers (3 tabs) */}
+        <div className="grid grid-cols-3 gap-1.5">
+          <button
+            type="button"
+            onClick={() => setActiveTab('garment')}
+            className={`flex items-center justify-center gap-1.5 py-2 px-2 text-xs rounded-lg font-medium transition-all text-center ${
+              activeTab === 'garment'
+                ? 'bg-amber-400 text-slate-950 font-bold shadow-sm ring-1 ring-amber-400/40'
+                : 'bg-white/[0.03] text-slate-300 hover:text-white hover:bg-white/[0.08] border border-white/5'
+            }`}
+          >
+            <Shirt className="w-3.5 h-3.5 shrink-0" />
+            <span className="truncate">ทรง & สีเสื้อ</span>
+          </button>
 
-        <button
-          onClick={() => setActiveTab('tech')}
-          className={`flex items-center gap-1.5 px-3 py-2 text-xs rounded-lg font-medium whitespace-nowrap transition-all ${
-            activeTab === 'tech'
-              ? 'bg-amber-400 text-slate-950 font-bold shadow-sm'
-              : 'text-slate-400 hover:text-white hover:bg-white/5'
-          }`}
-        >
-          <Sliders className="w-3.5 h-3.5" />
-          <span>เทคนิค</span>
-        </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('tech')}
+            className={`flex items-center justify-center gap-1.5 py-2 px-2 text-xs rounded-lg font-medium transition-all text-center ${
+              activeTab === 'tech'
+                ? 'bg-amber-400 text-slate-950 font-bold shadow-sm'
+                : 'bg-white/[0.03] text-slate-300 hover:text-white hover:bg-white/[0.08] border border-white/5'
+            }`}
+          >
+            <Sliders className="w-3.5 h-3.5 shrink-0" />
+            <span className="truncate">เทคนิคสกรีน</span>
+          </button>
 
-        <button
-          onClick={() => setActiveTab('layers')}
-          className={`flex items-center gap-1.5 px-3 py-2 text-xs rounded-lg font-medium whitespace-nowrap transition-all ${
-            activeTab === 'layers'
-              ? 'bg-amber-400 text-slate-950 font-bold shadow-sm'
-              : 'text-slate-400 hover:text-white hover:bg-white/5'
-          }`}
-        >
-          <Layers className="w-3.5 h-3.5" />
-          <span>เลเยอร์ ({layers.length})</span>
-        </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('layers')}
+            className={`flex items-center justify-center gap-1.5 py-2 px-2 text-xs rounded-lg font-medium transition-all text-center ${
+              activeTab === 'layers'
+                ? 'bg-amber-400 text-slate-950 font-bold shadow-sm'
+                : 'bg-white/[0.03] text-slate-300 hover:text-white hover:bg-white/[0.08] border border-white/5'
+            }`}
+          >
+            <Layers className="w-3.5 h-3.5 shrink-0" />
+            <span className="truncate">เลเยอร์ ({layers.length})</span>
+          </button>
+        </div>
       </div>
 
       {/* Target Side & Quick Color Bar */}
